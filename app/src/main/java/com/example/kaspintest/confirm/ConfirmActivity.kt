@@ -11,41 +11,57 @@ import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.kaspintest.R
-import com.example.kaspintest.database.FirebaseDB
 import com.example.kaspintest.database.LocalDB
 import com.example.kaspintest.dataparcel.ItemData
+import com.example.kaspintest.order.OrderActivity
 import com.example.kaspintest.success.SuccessActivity
 import com.example.kaspintest.transaction.TransactionActivity
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.*
 import java.lang.Exception
+import java.net.InetAddress
+import java.net.UnknownHostException
+import java.util.*
+import java.util.concurrent.*
+import kotlin.collections.ArrayList
 
 class ConfirmActivity : AppCompatActivity() {
-    val transactionActivity                : TransactionActivity = TransactionActivity()
+    val transactionActivity         : TransactionActivity = TransactionActivity()
+    val orderActivity               : OrderActivity = OrderActivity()
 
-    private val firebaseDB = FirebaseDB()
+    private lateinit var database   : FirebaseDatabase
+    private lateinit var ref        : DatabaseReference
 
-    var localDB  : LocalDB? = null
-    private lateinit var rvConfirm : RecyclerView
-    private lateinit var btSubmit : Button
-    private lateinit var btSaveOrder : Button
-    private lateinit var imgCancel : ImageView
+    private val parentReference     = "kaspin"
+    private val childList           = "orderlist"
+    private val childDraft          = "draftlist"
 
-    private val listItemConfirm = ArrayList<String>()
-    private val listIdConfirm = ArrayList<String>()
-    private val listCodeConfirm = ArrayList<String>()
-    private val listStockConfirm = ArrayList<String>()
-    private val listNum = ArrayList<Int>()
+    private val childId             = "id"
+    private val childCode           = "code"
+    private val childStock          = "stock"
+    private val childOrderCode      = "ordercode"
+    private val childNum            = "num"
 
-    private val list = ArrayList<ItemData>()
+    var localDB                     : LocalDB? = null
+    private lateinit var rvConfirm  : RecyclerView
+    private lateinit var btSubmit   : Button
+    private lateinit var btSaveOrder: Button
+    private lateinit var imgCancel  : ImageView
 
-    val MESSAGE_PLUSMIN : Int = 0
-    val MESSAGE_DEL : Int = 1
+    private val listItemConfirm     = ArrayList<String>()
+    private val listIdConfirm       = ArrayList<String>()
+    private val listCodeConfirm     = ArrayList<String>()
+    private val listStockConfirm    = ArrayList<String>()
+    private val listNum             = ArrayList<Int>()
 
-    val msgName : String = "keyName"
-    val msgNow : String = "keyNow"
+    private val list                = ArrayList<ItemData>()
 
-    private var totalItem : Int = 0
+    val MESSAGE_PLUSMIN             : Int = 0
+    val MESSAGE_DEL                 : Int = 1
+
+    val msgName                     : String = "keyName"
+    val msgNow                      : String = "keyNow"
+
+    private var totalItem           : Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,21 +71,59 @@ class ConfirmActivity : AppCompatActivity() {
         btSubmit = findViewById(R.id.btSubmit)
         btSaveOrder = findViewById(R.id.btSaveOrder)
         imgCancel = findViewById(R.id.imgCancel)
+        database = FirebaseDatabase.getInstance()
 
-        totalItem = intent.getIntExtra(transactionActivity.keyTotal, 0)
-        if(totalItem > 0){
-            for(i in 0..totalItem - 1){
-                listNum.add(1)
+        val load = intent.getStringExtra(transactionActivity.keyDB)
+        if(load.equals("FIREBASE")){
+            val orderName = intent.getStringExtra(orderActivity.keyName).toString()
+            val dataList = ArrayList<ItemData>()
+            if(isOnline()){
+                ref = database.getReference(parentReference).child(childList).child(orderName)
+                ref.get().addOnSuccessListener {
+                    for (ds in it.children) {
+                        if(ds.hasChildren()){
+                            val itemName = ds.key.toString()
+                            val itemId = ds.child(childId).getValue().toString()
+                            val itemCode = ds.child(childCode).getValue().toString()
+                            val itemStock = ds.child(childStock).getValue().toString()
+                            val itemNum = Integer.parseInt(ds.child(childNum).getValue().toString())
+
+                            listItemConfirm.add(itemName)
+                            listIdConfirm.add(itemId)
+                            listCodeConfirm.add(itemCode)
+                            listStockConfirm.add(itemStock)
+                            listNum.add(itemNum)
+
+                            val itemData = ItemData(itemName, itemId, itemCode, itemStock)
+                            dataList.add(itemData)
+                        }
+                    }
+                    list.addAll(dataList)
+                    showRecyclerList()
+                    Toast.makeText(this@ConfirmActivity, "Sukses memuat order", Toast.LENGTH_SHORT).show()
+                }.addOnFailureListener{
+                    Toast.makeText(this@ConfirmActivity, "Gagal memuat order", Toast.LENGTH_SHORT).show()
+                }
             }
-            for (i in 0..totalItem - 1){
-                val keyItem = transactionActivity.keyItem + i.toString()
-                val nameItem = intent.getStringExtra(keyItem).toString()
-                listItemConfirm.add(nameItem)
+            else{
+                Toast.makeText(this@ConfirmActivity, "Tidak ada koneksi internet", Toast.LENGTH_SHORT).show()
             }
         }
-
-        list.addAll(readDB())
-        showRecyclerList()
+        else{
+            totalItem = intent.getIntExtra(transactionActivity.keyTotal, 0)
+            if(totalItem > 0){
+                for(i in 0..totalItem - 1){
+                    listNum.add(1)
+                }
+                for (i in 0..totalItem - 1){
+                    val keyItem = transactionActivity.keyItem + i.toString()
+                    val nameItem = intent.getStringExtra(keyItem).toString()
+                    listItemConfirm.add(nameItem)
+                }
+                list.addAll(readDB())
+                showRecyclerList()
+            }
+        }
 
         imgCancel.setOnClickListener {
             val intent = Intent(this@ConfirmActivity, TransactionActivity::class.java)
@@ -78,16 +132,41 @@ class ConfirmActivity : AppCompatActivity() {
         }
 
         btSaveOrder.setOnClickListener {
-            val orderNum = firebaseDB.readOrder()
+            if(isOnline()){
+                val loadS = intent.getStringExtra(transactionActivity.keyDB)
 
-            Toast.makeText(this@ConfirmActivity, orderNum, Toast.LENGTH_SHORT).show()
-//            val setOrder = "Order " + orderNum.toString()
-//            if(firebaseDB.writeOrder("setOrder", "Rujak", "1", "A1", "10")){
-//                Toast.makeText(this@ConfirmActivity, "Sukses", Toast.LENGTH_SHORT).show()
-//            }
-//            else{
-//                Toast.makeText(this@ConfirmActivity, "Gagal", Toast.LENGTH_SHORT).show()
-//            }
+                if(loadS.equals("FIREBASE")){
+                    ref = database.getReference(parentReference).child(childList)
+                    ref.get().addOnSuccessListener {
+                        val orderNum = intent.getStringExtra(orderActivity.keyName).toString()
+                        val orderCode = UUID.randomUUID().toString().take(8).uppercase()
+                        val total = listItemConfirm.size
+                        for(i in 0..total - 1){
+                            writeOrder(orderNum, orderCode, listItemConfirm.get(i), listIdConfirm.get(i), listCodeConfirm.get(i), listStockConfirm.get(i), listNum.get(i).toString())
+                        }
+                        Toast.makeText(this@ConfirmActivity, "Sukses memperbarui order", Toast.LENGTH_SHORT).show()
+                    }.addOnFailureListener{
+                        Toast.makeText(this@ConfirmActivity, "Gagal memperbarui order", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                else{
+                    ref = database.getReference(parentReference).child(childList)
+                    ref.get().addOnSuccessListener {
+                        val orderNum = "Order " + (it.childrenCount + 1).toString()
+                        val orderCode = UUID.randomUUID().toString().take(8).uppercase()
+                        val total = listItemConfirm.size
+                        for(i in 0..total - 1){
+                            writeOrder(orderNum, orderCode, listItemConfirm.get(i), listIdConfirm.get(i), listCodeConfirm.get(i), listStockConfirm.get(i), listNum.get(i).toString())
+                        }
+                        Toast.makeText(this@ConfirmActivity, "Sukses menyimpan order", Toast.LENGTH_SHORT).show()
+                    }.addOnFailureListener{
+                        Toast.makeText(this@ConfirmActivity, "Gagal menyimpan order", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+            else{
+                Toast.makeText(this@ConfirmActivity, "Tidak ada koneksi internet", Toast.LENGTH_SHORT).show()
+            }
         }
 
         btSubmit.setOnClickListener {
@@ -98,7 +177,7 @@ class ConfirmActivity : AppCompatActivity() {
     private fun showRecyclerList(){
         rvConfirm.setHasFixedSize(true)
         rvConfirm.layoutManager = LinearLayoutManager(this)
-        val confirmAdapter = ConfirmAdapter(this, handler, list)
+        val confirmAdapter = ConfirmAdapter(this, handler, list, listNum)
         rvConfirm.adapter = confirmAdapter
     }
 
@@ -179,9 +258,65 @@ class ConfirmActivity : AppCompatActivity() {
             }
         }
         if(stateSuccess){
+            ref = database.getReference(parentReference).child(childDraft)
+            ref.get().addOnSuccessListener {
+                val draftNum = "Draft " + (it.childrenCount + 1).toString()
+                val draftCode = UUID.randomUUID().toString().take(8).uppercase()
+                val totalDraft = listItemConfirm.size
+                for(i in 0..totalDraft - 1){
+                    writeDraft(draftNum, draftCode, listItemConfirm.get(i), listIdConfirm.get(i), listCodeConfirm.get(i), listStockConfirm.get(i), listNum.get(i).toString())
+                }
+            }.addOnFailureListener{}
+
+            val loadD = intent.getStringExtra(transactionActivity.keyDB)
+            if(loadD.equals("FIREBASE")){
+                val orderDelete = intent.getStringExtra(orderActivity.keyName).toString()
+                ref = database.getReference(parentReference).child(childList)
+                ref.child(orderDelete).removeValue()
+            }
+
             val intent = Intent(this@ConfirmActivity, SuccessActivity::class.java)
             startActivity(intent)
             finish()
         }
+    }
+
+    //ONLINE
+    private fun isOnline() : Boolean {
+        var inetAddress: InetAddress? = null
+        try {
+            val future: Future<InetAddress?>? =
+                Executors.newSingleThreadExecutor().submit(object : Callable<InetAddress?> {
+                    override fun call(): InetAddress? {
+                        return try {
+                            InetAddress.getByName("google.com")
+                        } catch (e: UnknownHostException) {
+                            null
+                        }
+                    }
+                })
+            inetAddress = future!!.get(1000, TimeUnit.MILLISECONDS)
+            future!!.cancel(true)
+        } catch (e: InterruptedException) {
+        } catch (e: ExecutionException) {
+        } catch (e: TimeoutException) {
+        }
+        return inetAddress != null && !inetAddress.equals("")
+    }
+
+    fun writeOrder(order : String, orderCode : String, name : String, id : String, code : String, stock : String, num : String){
+        val itemData = ItemData(name, id, code, stock)
+        ref = database.getReference(parentReference).child(childList)
+        ref.child(order).child(childOrderCode).setValue(orderCode)
+        ref.child(order).child(name).setValue(itemData)
+        ref.child(order).child(name).child(childNum).setValue(num)
+    }
+
+    fun writeDraft(draft : String, draftCode : String, name : String, id : String, code : String, stock : String, num : String){
+        val itemData = ItemData(name, id, code, stock)
+        ref = database.getReference(parentReference).child(childDraft)
+        ref.child(draft).child(childOrderCode).setValue(draftCode)
+        ref.child(draft).child(name).setValue(itemData)
+        ref.child(draft).child(name).child(childNum).setValue(num)
     }
 }

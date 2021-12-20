@@ -13,7 +13,7 @@ import com.example.kaspintest.R
 import com.example.kaspintest.dataparcel.ItemData
 
 class TransactionAdapter(private val context : Context, val handler : Handler, private val itemData : ArrayList<ItemData>) : RecyclerView.Adapter<TransactionAdapter.ListViewHolder>() {
-    var transactionActivity                : TransactionActivity = TransactionActivity()
+    var transactionActivity                 : TransactionActivity = TransactionActivity()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ListViewHolder {
         val view : View = LayoutInflater.from(parent.context).inflate(R.layout.rv_item_transaction, parent, false)

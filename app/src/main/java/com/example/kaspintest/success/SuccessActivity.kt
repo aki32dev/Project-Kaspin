@@ -5,7 +5,6 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
 import com.example.kaspintest.R
-import com.example.kaspintest.main.MainActivity
 import com.example.kaspintest.transaction.TransactionActivity
 
 class SuccessActivity : AppCompatActivity() {

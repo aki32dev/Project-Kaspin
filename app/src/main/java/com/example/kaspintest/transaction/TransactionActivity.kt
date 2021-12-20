@@ -4,8 +4,8 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
-import android.util.Log
 import android.view.Menu
+import android.view.MenuItem
 import android.widget.Button
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -14,21 +14,22 @@ import com.example.kaspintest.R
 import com.example.kaspintest.confirm.ConfirmActivity
 import com.example.kaspintest.database.LocalDB
 import com.example.kaspintest.dataparcel.ItemData
-import com.example.kaspintest.item.ItemAdapter
+import com.example.kaspintest.order.OrderActivity
 
 class TransactionActivity : AppCompatActivity() {
-    var localDB  : LocalDB? = null
-    private lateinit var rvTransaction : RecyclerView
-    private lateinit var btCheckout : Button
-    private val listTrans = ArrayList<String>()
-    private val list = ArrayList<ItemData>()
+    var localDB                         : LocalDB? = null
+    private lateinit var rvTransaction  : RecyclerView
+    private lateinit var btCheckout     : Button
+    private val listTrans               = ArrayList<String>()
+    private val list                    = ArrayList<ItemData>()
 
-    val MESSAGE_ADD : Int = 0
-    val MESSAGE_DEL : Int = 1
+    val MESSAGE_ADD                     : Int = 0
+    val MESSAGE_DEL                     : Int = 1
 
-    val msgName : String = "keyName"
-    val keyItem : String = "keyItem"
-    val keyTotal : String = "keyTotal"
+    val msgName                         : String = "keyName"
+    val keyItem                         : String = "keyItem"
+    val keyTotal                        : String = "keyTotal"
+    val keyDB                           : String = "keyDatabase"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,7 +46,7 @@ class TransactionActivity : AppCompatActivity() {
             val intent = Intent(this@TransactionActivity, ConfirmActivity::class.java)
             if(total > 0){
                 intent.putExtra(keyTotal, total)
-
+                intent.putExtra(keyDB, "LOCAL")
                 for (i in 0..total - 1){
                     val key = "keyItem" + i.toString()
                     intent.putExtra(key, listTrans.get(i))
@@ -57,6 +58,22 @@ class TransactionActivity : AppCompatActivity() {
                 Toast.makeText(this@TransactionActivity, "Silakan pilih barang", Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        getMenuInflater().inflate(R.menu.menu_transaction, menu);
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when(item.itemId){
+            R.id.btOrder -> {
+                val intent = Intent(this@TransactionActivity, OrderActivity::class.java)
+                startActivity(intent)
+                finish()
+            }
+        }
+        return super.onOptionsItemSelected(item)
     }
 
     private fun showRecyclerList(){

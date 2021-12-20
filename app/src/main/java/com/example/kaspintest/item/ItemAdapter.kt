@@ -13,7 +13,7 @@ import com.example.kaspintest.R
 import com.example.kaspintest.dataparcel.ItemData
 
 class ItemAdapter(private val context : Context, val handler : Handler, private val itemData : ArrayList<ItemData>) : RecyclerView.Adapter<ItemAdapter.ListViewHolder>() {
-    val itemActivity                : ItemActivity      = ItemActivity()
+    val itemActivity                    : ItemActivity      = ItemActivity()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ListViewHolder {
         val view : View = LayoutInflater.from(parent.context).inflate(R.layout.rv_item_stock, parent, false)

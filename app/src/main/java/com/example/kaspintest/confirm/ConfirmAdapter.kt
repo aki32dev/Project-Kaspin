@@ -15,8 +15,8 @@ import com.example.kaspintest.R
 import com.example.kaspintest.dataparcel.ItemData
 import java.lang.Exception
 
-class ConfirmAdapter(private val context : Context, val handler : Handler, private val itemData : ArrayList<ItemData>) : RecyclerView.Adapter<ConfirmAdapter.ListViewHolder>() {
-    val confirmActivity                : ConfirmActivity = ConfirmActivity()
+class ConfirmAdapter(private val context : Context, val handler : Handler, private val itemData : ArrayList<ItemData>, private val num : ArrayList<Int>) : RecyclerView.Adapter<ConfirmAdapter.ListViewHolder>() {
+    val confirmActivity                 : ConfirmActivity = ConfirmActivity()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ListViewHolder {
         val view : View = LayoutInflater.from(parent.context).inflate(R.layout.rv_item_confirm, parent, false)
@@ -27,17 +27,11 @@ class ConfirmAdapter(private val context : Context, val handler : Handler, priva
         val (name, id, code, stock) = itemData[position]
         holder.tvConfirmName.text  = name
         holder.tvConfirmCode.text  = code
+        holder.tvConfirm.text = num.get(position).toString()
 
-        var orderNum : Int = 1
         var orderStock : Int = 0
 
         holder.imgConfirmDelete.setOnClickListener {
-            try{
-                orderNum = Integer.parseInt(holder.tvConfirm.text.toString())
-            }catch (e : Exception){
-                Log.e("strtoint", holder.tvConfirm.text.toString())
-            }
-
             if(stock != null){
                 try{
                     orderStock = Integer.parseInt(stock)
@@ -49,18 +43,12 @@ class ConfirmAdapter(private val context : Context, val handler : Handler, priva
             val message = handler.obtainMessage(confirmActivity.MESSAGE_DEL)
             val bundle = Bundle()
             bundle.putString(confirmActivity.msgName, name)
-            bundle.putInt(confirmActivity.msgNow, orderNum)
+            bundle.putInt(confirmActivity.msgNow, num.get(position))
             message.data = bundle
             handler.sendMessage(message)
         }
 
         holder.imgPlus.setOnClickListener {
-            try{
-                orderNum = Integer.parseInt(holder.tvConfirm.text.toString())
-            }catch (e : Exception){
-                Log.e("strtoint", holder.tvConfirm.text.toString())
-            }
-
             try{
                 orderStock = Integer.parseInt(stock)
             }catch (e : Exception){
@@ -69,35 +57,29 @@ class ConfirmAdapter(private val context : Context, val handler : Handler, priva
                 }
             }
 
-            if(orderNum == orderStock){
+            if(num.get(position) == orderStock){
                 Toast.makeText(context, "Stok tersedia hanya " + stock, Toast.LENGTH_SHORT).show()
             }
             else{
-                orderNum += 1
-                holder.tvConfirm.setText(orderNum.toString())
+                num.set(position, num.get(position) + 1)
+                holder.tvConfirm.setText(num.get(position).toString())
                 val message = handler.obtainMessage(confirmActivity.MESSAGE_PLUSMIN)
                 val bundle = Bundle()
                 bundle.putString(confirmActivity.msgName, name)
-                bundle.putInt(confirmActivity.msgNow, orderNum)
+                bundle.putInt(confirmActivity.msgNow, num.get(position))
                 message.data = bundle
                 handler.sendMessage(message)
             }
         }
 
         holder.imgMin.setOnClickListener {
-            try{
-                orderNum = Integer.parseInt(holder.tvConfirm.text.toString())
-            }catch (e : Exception){
-                Log.e("strtoint", holder.tvConfirm.text.toString())
-            }
-
-            if(orderNum > 1){
-                orderNum -= 1
-                holder.tvConfirm.setText(orderNum.toString())
+            if(num.get(position) > 1){
+                num.set(position, num.get(position) - 1)
+                holder.tvConfirm.setText(num.get(position).toString())
                 val message = handler.obtainMessage(confirmActivity.MESSAGE_PLUSMIN)
                 val bundle = Bundle()
                 bundle.putString(confirmActivity.msgName, name)
-                bundle.putInt(confirmActivity.msgNow, orderNum)
+                bundle.putInt(confirmActivity.msgNow, num.get(position))
                 message.data = bundle
                 handler.sendMessage(message)
             }

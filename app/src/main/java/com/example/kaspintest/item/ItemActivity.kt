@@ -22,18 +22,18 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 class ItemActivity : AppCompatActivity() {
-    var localDB  : LocalDB? = null
-    private lateinit var rvItem : RecyclerView
-    private val list = ArrayList<ItemData>()
+    var localDB                     : LocalDB? = null
+    private lateinit var rvItem     : RecyclerView
+    private val list                = ArrayList<ItemData>()
 
-    val MESSAGE_EDIT : Int = 0
-    val MESSAGE_DEL : Int = 1
+    val MESSAGE_EDIT                : Int = 0
+    val MESSAGE_DEL                 : Int = 1
 
-    val msgName : String = "keyName"
-    val msgStock : String = "keyStock"
+    val msgName                     : String = "keyName"
+    val msgStock                    : String = "keyStock"
 
-    private lateinit var dialog : Dialog
-    var itemId : Int = 0
+    private lateinit var dialog     : Dialog
+    var itemId                      : Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
