@@ -66,6 +66,7 @@ class ConfirmActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_confirm)
+        supportActionBar!!.title = "Checkout"
         localDB = LocalDB(this@ConfirmActivity)
         rvConfirm = findViewById(R.id.rvConfirm)
         btSubmit = findViewById(R.id.btSubmit)

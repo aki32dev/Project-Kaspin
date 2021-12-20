@@ -40,6 +40,7 @@ class OrderActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_order)
+        supportActionBar!!.title = "Order"
         database = FirebaseDatabase.getInstance()
         rvOrder = findViewById(R.id.rvOrder)
 

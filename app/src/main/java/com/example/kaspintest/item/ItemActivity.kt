@@ -38,6 +38,7 @@ class ItemActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_item)
+        supportActionBar!!.title = "Barang"
         dialog = Dialog(this@ItemActivity)
         localDB = LocalDB(this@ItemActivity)
         rvItem = findViewById(R.id.rvItem)

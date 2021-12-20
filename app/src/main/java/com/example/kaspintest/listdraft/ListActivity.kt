@@ -30,6 +30,7 @@ class ListActivity : AppCompatActivity(){
         database = FirebaseDatabase.getInstance()
 
         val orderName = intent.getStringExtra(draftActivity.keyName).toString()
+        supportActionBar!!.title = orderName
         ref = database.getReference(parentReference).child(childDraft).child(orderName)
         ref.get().addOnSuccessListener {
             for (ds in it.children) {
