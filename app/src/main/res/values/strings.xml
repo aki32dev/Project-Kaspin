@@ -1,0 +1,25 @@
+<resources>
+    <string name="app_name">Kaspintest</string>
+    <string name="greet">Hello</string>
+    <string name="profileName">Mark Z</string>
+    <string name="item">Barang</string>
+    <string name="transaction">Transaksi</string>
+    <string name="draft">Draft Transaksi</string>
+    <string name="date">1 Januari 2000 </string>
+    <string name="itemAction">Tambah / Perbarui</string>
+    <string name="itemDelete">Hapus</string>
+    <string name="openOrder">Order</string>
+    <string name="rvItemName">Nama Barang</string>
+    <string name="rvItemKode">Kode Barang</string>
+    <string name="rvItemStok">Stok Barang</string>
+    <string name="rvItemTotal">1</string>
+    <string name="rvItemKodeOrder">Kode Order</string>
+    <string name="rvOrder">Nama Order</string>
+    <string name="checkout">Checkout</string>
+    <string name="submit">Submit</string>
+    <string name="sOrder">Save Order</string>
+    <string name="success">Transaction Success!</string>
+    <string name="newTransaction">New Transaction</string>
+    <string name="home">Home</string>
+    <string name="itemName">Tambah atau Perbarui</string>
+</resources>
